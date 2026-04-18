@@ -13,7 +13,7 @@ const server = http.createServer(app);
 // Setup Socket.io
 const io = new Server(server, {
   cors: {
-    origin: 'https://team-delta-mauve.vercel.app/',
+    origin: true,
     methods: ['GET', 'POST']
   }
 });
