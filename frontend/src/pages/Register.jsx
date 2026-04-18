@@ -10,7 +10,7 @@ import GlassCard from '../components/GlassCard';
 const Register = () => {
   const [formData, setFormData] = useState({ name: '', email: '', password: '', serviceType: 'Plumbing' });
   const [role, setRole] = useState('user');
-  
+
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const location = useLocation();
@@ -26,7 +26,8 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const { data } = await api.post('/auth/register', { ...formData, role });
+      const endpoint = role === 'captain' ? '/auth/register/captain' : '/auth/register/user';
+      const { data } = await api.post(endpoint, { ...formData, role });
       dispatch(setCredentials(data));
       toast.success('Registration successful!');
       navigate(data.role === 'captain' ? '/captain-dashboard' : '/dashboard');
@@ -41,7 +42,7 @@ const Register = () => {
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="w-full max-w-md">
         <GlassCard>
           <h2 className="text-3xl font-display font-bold mb-8 text-center">Create Account</h2>
-          
+
           <div className="flex bg-slate-800/50 rounded-xl p-1 mb-8 backdrop-blur-md">
             {['user', 'captain'].map((r) => (
               <button
@@ -68,7 +69,7 @@ const Register = () => {
               <label className="block text-sm font-medium opacity-80 mb-2">Password</label>
               <input type="password" name="password" value={formData.password} onChange={handleChange} className="w-full px-4 py-3" placeholder="••••••••" required />
             </div>
-            
+
             {role === 'captain' && (
               <div>
                 <label className="block text-sm font-medium opacity-80 mb-2">Service Specialization</label>
@@ -79,12 +80,12 @@ const Register = () => {
                 </select>
               </div>
             )}
-            
+
             <button type="submit" className="btn-primary w-full mt-8 py-3 !bg-purple-600 hover:!bg-purple-700">
               Register as {role.charAt(0).toUpperCase() + role.slice(1)}
             </button>
           </form>
-          
+
           <p className="mt-8 text-center text-sm opacity-70">
             Already verified? <Link to="/login" className="text-purple-400 hover:text-purple-300 font-medium ml-1">Login</Link>
           </p>
