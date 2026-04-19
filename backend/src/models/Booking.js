@@ -29,6 +29,11 @@ const bookingSchema = new mongoose.Schema({
     type: Date,
     required: true
   },
+  timeSlot: {
+    type: String,
+    enum: ['Now', 'Morning (9AM-12PM)', 'Afternoon (12PM-4PM)', 'Evening (4PM-8PM)'],
+    default: 'Now'
+  },
   price: {
     type: Number,
     required: true

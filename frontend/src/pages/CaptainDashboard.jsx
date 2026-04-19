@@ -10,7 +10,7 @@ import api from '../services/api';
 import { toast } from 'react-toastify';
 import { io } from 'socket.io-client';
 import { motion } from 'framer-motion';
-import { FiUser, FiPhone } from 'react-icons/fi';
+import { FiUser, FiPhone, FiClock } from 'react-icons/fi';
 import WithdrawalModal from '../components/WithdrawalModal';
 import ProfileModal from '../components/ProfileModal';
 
@@ -40,7 +40,7 @@ const CaptainDashboard = () => {
       return;
     }
 
-    const socket = io('http://localhost:8000');
+    const socket = io('http://localhost:5001');
 
     socket.emit('join', user._id);
 
@@ -134,7 +134,7 @@ const CaptainDashboard = () => {
         </div>
 
         <div className="flex items-center gap-4 mt-4 md:mt-0">
-          <button 
+          <button
             onClick={() => setIsProfileModalOpen(true)}
             className="px-5 py-2 h-[48px] bg-slate-800 hover:bg-slate-700 border border-white/10 rounded-xl transition-colors font-medium text-sm flex items-center gap-2"
           >
@@ -163,79 +163,86 @@ const CaptainDashboard = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {displayedRequests.map(req => (
-          <motion.div key={req._id} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
-            <GlassCard className="h-full flex flex-col justify-between hover:border-indigo-500/30 transition-colors">
-              <div>
-                <div className="flex justify-between items-start mb-6 pb-4 border-b border-white/10">
-                  <h3 className="text-xl font-display font-bold text-white">Job #{req._id.slice(-4)}</h3>
-                  <span className={`badge ${req.status === 'requested' ? 'badge-yellow' : req.status === 'completed' ? 'badge-green' : 'badge-blue'}`}>
-                    {req.status}
-                  </span>
-                </div>
+          {displayedRequests.map(req => (
+            <motion.div key={req._id} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
+              <GlassCard className="h-full flex flex-col justify-between hover:border-indigo-500/30 transition-colors">
+                <div>
+                  <div className="flex justify-between items-start mb-6 pb-4 border-b border-white/10">
+                    <h3 className="text-xl font-display font-bold text-white">Job #{req._id.slice(-4)}</h3>
+                    <span className={`badge ${req.status === 'requested' ? 'badge-yellow' : req.status === 'completed' ? 'badge-green' : 'badge-blue'}`}>
+                      {req.status}
+                    </span>
+                  </div>
 
-                <div className="grid grid-cols-2 gap-4 mb-6">
-                  <div className="bg-white/5 p-3 rounded-xl">
-                    <p className="text-xs opacity-60 mb-1">Client</p>
-                    <p className="font-medium text-sm">{req.user?.name || 'Unknown'}</p>
-                    {req.status !== 'requested' && req.user?.phone && (
-                      <p className="text-xs text-indigo-400 mt-1 flex items-center gap-1">
-                        <FiPhone className="text-[10px]" /> {req.user.phone}
-                      </p>
-                    )}
-                  </div>
-                  <div className="bg-white/5 p-3 rounded-xl">
-                    <p className="text-xs opacity-60 mb-1">Payout</p>
-                    <p className="font-bold text-lg text-indigo-400">${req.price}</p>
-                  </div>
-                  <div className="col-span-2 bg-white/5 p-3 rounded-xl">
-                    <p className="text-xs opacity-60 mb-1">Address</p>
-                    <p className="text-sm mb-3">{req.location?.address}</p>
-                    {(req.status === 'accepted' || req.status === 'in_progress') && req.location?.lat && req.location?.lng && (
-                      <div className="h-[200px] w-full rounded-xl overflow-hidden shadow-inner border border-white/10 relative z-0 mt-2">
-                        <MapContainer center={[req.location.lat, req.location.lng]} zoom={14} style={{ height: '100%', width: '100%' }}>
-                          <TileLayer
-                            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                            attribution='&copy; OpenStreetMap contributors'
-                          />
-                          <Marker position={[req.location.lat, req.location.lng]}></Marker>
-                        </MapContainer>
+                  <div className="grid grid-cols-2 gap-4 mb-6">
+                    <div className="bg-white/5 p-3 rounded-xl">
+                      <p className="text-xs opacity-60 mb-1">Client</p>
+                      <p className="font-medium text-sm">{req.user?.name || 'Unknown'}</p>
+                      {req.status !== 'requested' && req.user?.phone && (
+                        <p className="text-xs text-indigo-400 mt-1 flex items-center gap-1">
+                          <FiPhone className="text-[10px]" /> {req.user.phone}
+                        </p>
+                      )}
+                    </div>
+                    <div className="bg-white/5 p-3 rounded-xl">
+                      <p className="text-xs opacity-60 mb-1">Payout</p>
+                      <p className="font-bold text-lg text-indigo-400">${req.price}</p>
+                    </div>
+                    <div className="col-span-2 bg-white/5 p-3 rounded-xl">
+                      <div className="flex justify-between items-center mb-1">
+                        <p className="text-xs opacity-60">Address & Schedule</p>
+                        {req.timeSlot && (
+                          <span className="text-xs bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded-full border border-indigo-500/20 flex items-center gap-1">
+                            <FiClock className="text-[10px]" /> {req.timeSlot}
+                          </span>
+                        )}
                       </div>
-                    )}
+                      <p className="text-sm mb-3">{req.location?.address}</p>
+                      {(req.status === 'accepted' || req.status === 'in_progress') && req.location?.lat && req.location?.lng && (
+                        <div className="h-[200px] w-full rounded-xl overflow-hidden shadow-inner border border-white/10 relative z-0 mt-2">
+                          <MapContainer center={[req.location.lat, req.location.lng]} zoom={14} style={{ height: '100%', width: '100%' }}>
+                            <TileLayer
+                              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                              attribution='&copy; OpenStreetMap contributors'
+                            />
+                            <Marker position={[req.location.lat, req.location.lng]}></Marker>
+                          </MapContainer>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <div className="flex gap-3 mt-4">
-                {req.status === 'requested' && (
-                  <button onClick={() => handleStatusChange(req._id, 'accepted')} className="btn-primary w-full py-3">
-                    Accept Job
-                  </button>
-                )}
-                {req.status === 'accepted' && (
-                  <button onClick={() => handleStatusChange(req._id, 'in_progress')} className="w-full bg-blue-500 hover:bg-blue-600 text-white rounded-xl font-bold py-3 transition-colors shadow-lg shadow-blue-500/20">
-                    Start Work
-                  </button>
-                )}
-                {req.status === 'in_progress' && (
-                  <button onClick={() => handleStatusChange(req._id, 'completed')} className="w-full bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-bold py-3 transition-colors shadow-lg shadow-emerald-500/20">
-                    Complete Job
-                  </button>
-                )}
-              </div>
-            </GlassCard>
-          </motion.div>
-        ))}
-        {displayedRequests.length === 0 && (
-          <div className="col-span-full py-16">
-            <GlassCard className="text-center">
-              <div className="text-4xl mb-4 opacity-50">📡</div>
-              <h3 className="text-lg font-medium mb-2">Scanning for requests...</h3>
-              <p className="text-sm opacity-60">Keep your availability switched on to receive local jobs.</p>
-            </GlassCard>
-          </div>
-        )}
-      </div>
+                <div className="flex gap-3 mt-4">
+                  {req.status === 'requested' && (
+                    <button onClick={() => handleStatusChange(req._id, 'accepted')} className="btn-primary w-full py-3">
+                      Accept Job
+                    </button>
+                  )}
+                  {req.status === 'accepted' && (
+                    <button onClick={() => handleStatusChange(req._id, 'in_progress')} className="w-full bg-blue-500 hover:bg-blue-600 text-white rounded-xl font-bold py-3 transition-colors shadow-lg shadow-blue-500/20">
+                      Start Work
+                    </button>
+                  )}
+                  {req.status === 'in_progress' && (
+                    <button onClick={() => handleStatusChange(req._id, 'completed')} className="w-full bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-bold py-3 transition-colors shadow-lg shadow-emerald-500/20">
+                      Complete Job
+                    </button>
+                  )}
+                </div>
+              </GlassCard>
+            </motion.div>
+          ))}
+          {displayedRequests.length === 0 && (
+            <div className="col-span-full py-16">
+              <GlassCard className="text-center">
+                <div className="text-4xl mb-4 opacity-50">📡</div>
+                <h3 className="text-lg font-medium mb-2">Scanning for requests...</h3>
+                <p className="text-sm opacity-60">Keep your availability switched on to receive local jobs.</p>
+              </GlassCard>
+            </div>
+          )}
+        </div>
       )}
 
       {/* History & Earnings Section */}
@@ -252,8 +259,8 @@ const CaptainDashboard = () => {
               onClick={handleWithdrawClick}
               disabled={!user?.earnings || user.earnings <= 0}
               className={`w-full py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-lg ${(!user?.earnings || user.earnings <= 0)
-                  ? 'bg-slate-800 text-slate-500 cursor-not-allowed border border-white/5 shadow-none'
-                  : 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-emerald-500/20 cursor-pointer'
+                ? 'bg-slate-800 text-slate-500 cursor-not-allowed border border-white/5 shadow-none'
+                : 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-emerald-500/20 cursor-pointer'
                 }`}
             >
               Withdraw to Bank

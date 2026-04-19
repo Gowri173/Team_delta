@@ -90,9 +90,6 @@ const Navbar = () => {
 
         {/* Right Actions */}
         <div className="flex gap-4 items-center">
-          <button className="hidden md:block bg-gradient-to-r from-indigo-500 to-purple-500 text-white px-5 py-2 rounded-full text-sm font-medium hover:shadow-[0_0_15px_rgba(168,85,247,0.4)] transition-all">
-            Download App
-          </button>
 
           {!isAuthenticated ? (
             <div className="flex gap-3 items-center">

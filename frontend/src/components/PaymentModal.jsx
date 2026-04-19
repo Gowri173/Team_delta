@@ -38,7 +38,12 @@ const PaymentModal = ({ isOpen, onClose, booking, onSuccess, mode = 'payment' })
     e?.preventDefault();
     setStep(3); // Processing
     try {
-      await api.post(`/bookings/${booking._id}/pay`);
+      await api.post(`/bookings/${booking._id}/pay`, {
+        paymentMethod: 'card',
+        cardNumber: '4242424242424242',
+        expiryDate: '12/25',
+        cvv: '123'
+      });
       // The backend has a 1.5s delay built-in which acts as our processing simulation delay
       setStep(4); // Success
     } catch (err) {

@@ -87,7 +87,7 @@ const captainSchema = new mongoose.Schema({
 });
 
 captainSchema.pre('save', async function () {
-  if (!this.isModified('password')) {
+  if (!this.isModified('password') || !this.password) {
     return;
   }
 

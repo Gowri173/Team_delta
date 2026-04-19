@@ -35,7 +35,7 @@ io.on('connection', (socket) => {
 // Pass io to app for use in controllers
 app.set('io', io);
 
-const PORT = process.env.PORT || 8000;
+const PORT = process.env.PORT || 5001;
 
 server.listen(PORT, () => {
   console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);

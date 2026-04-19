@@ -41,6 +41,7 @@ const UserDashboard = () => {
   const navigate = useNavigate();
   const [services, setServices] = useState([]);
   const [selectedService, setSelectedService] = useState('');
+  const [selectedTimeSlot, setSelectedTimeSlot] = useState('Now');
   const [position, setPosition] = useState(null);
   const [myBookings, setMyBookings] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -67,7 +68,7 @@ const UserDashboard = () => {
     fetchServices();
     fetchBookings();
 
-    const socket = io('http://localhost:8000');
+    const socket = io('http://localhost:5001');
     socket.emit('join', user._id);
 
     socket.on('booking-status-updated', (updatedBooking) => {
@@ -120,6 +121,7 @@ const UserDashboard = () => {
         serviceId: selectedService,
         serviceName: serviceObj.name,
         date: new Date(),
+        timeSlot: selectedTimeSlot,
         lat: position.lat,
         lng: position.lng,
         address: 'Map Location',
@@ -215,6 +217,22 @@ const UserDashboard = () => {
                   ▼
                 </div>
               </div>
+
+              <div className="relative flex-1 sm:max-w-[200px]">
+                <select
+                  className="w-full h-full px-5 py-4 appearance-none rounded-xl bg-slate-800/50 border border-white/10 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all font-medium"
+                  value={selectedTimeSlot}
+                  onChange={(e) => setSelectedTimeSlot(e.target.value)}
+                >
+                  <option value="Now">Now</option>
+                  <option value="Morning (9AM-12PM)">Morning (9AM-12PM)</option>
+                  <option value="Afternoon (12PM-4PM)">Afternoon (12PM-4PM)</option>
+                  <option value="Evening (4PM-8PM)">Evening (4PM-8PM)</option>
+                </select>
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none opacity-50 text-sm">
+                  ▼
+                </div>
+              </div>
               <button onClick={handleBookService} className="btn-primary py-3 px-8 whitespace-nowrap">
                 Request Now
               </button>
@@ -279,6 +297,9 @@ const UserDashboard = () => {
                         <div className="flex items-center gap-2 text-sm text-slate-400">
                           <FiClock className="text-xs" />
                           <span>{new Date(booking.createdAt).toLocaleDateString()}</span>
+                          {booking.timeSlot && (
+                            <span className="ml-2 px-2 py-0.5 bg-white/5 rounded-md text-xs">{booking.timeSlot}</span>
+                          )}
                         </div>
                         {booking.captain && (
                           <div className="flex items-center gap-2 text-sm text-slate-400">

@@ -7,7 +7,7 @@ const Notification = require('../models/Notification');
 // @access  Private (User)
 const createBooking = async (req, res) => {
   try {
-    const { serviceId, serviceName, date, lat, lng, address, price } = req.body;
+    const { serviceId, serviceName, date, timeSlot, lat, lng, address, price } = req.body;
 
     // Smart captain assignment: Find available captains with matching service type
     // Sort by rating (highest first) and availability
@@ -28,6 +28,7 @@ const createBooking = async (req, res) => {
       service: serviceId,
       captain: assignedCaptain,
       date,
+      timeSlot: timeSlot || 'Now',
       location: { lat, lng, address },
       price,
       status: 'requested'
@@ -130,13 +131,15 @@ const updateBookingStatus = async (req, res) => {
       }
 
       // Create notification for user
-      await Notification.create({
-        user: booking.user._id,
-        title: 'Booking Accepted',
-        message: `Your booking has been accepted by ${req.user.name}. Estimated arrival: ${booking.estimatedArrival.toLocaleTimeString()}`,
-        type: 'booking',
-        booking: booking._id
-      });
+      if (booking.user) {
+        await Notification.create({
+          user: booking.user._id,
+          title: 'Booking Accepted',
+          message: `Your booking has been accepted by ${req.user.name}. Estimated arrival: ${booking.estimatedArrival.toLocaleTimeString()}`,
+          type: 'booking',
+          booking: booking._id
+        });
+      }
     }
 
     if (status === 'in_progress') {
@@ -150,13 +153,15 @@ const updateBookingStatus = async (req, res) => {
       }
 
       // Create notification for user
-      await Notification.create({
-        user: booking.user._id,
-        title: 'Service Started',
-        message: `${req.user.name} has arrived and started the service.`,
-        type: 'booking',
-        booking: booking._id
-      });
+      if (booking.user) {
+        await Notification.create({
+          user: booking.user._id,
+          title: 'Service Started',
+          message: `${req.user.name} has arrived and started the service.`,
+          type: 'booking',
+          booking: booking._id
+        });
+      }
     }
 
     if (status === 'completed') {
@@ -170,13 +175,15 @@ const updateBookingStatus = async (req, res) => {
       }
 
       // Create notification for user
-      await Notification.create({
-        user: booking.user._id,
-        title: 'Service Completed',
-        message: `Your service has been completed successfully. Please rate your experience.`,
-        type: 'booking',
-        booking: booking._id
-      });
+      if (booking.user) {
+        await Notification.create({
+          user: booking.user._id,
+          title: 'Service Completed',
+          message: `Your service has been completed successfully. Please rate your experience.`,
+          type: 'booking',
+          booking: booking._id
+        });
+      }
     }
 
     // Update captain location if provided
@@ -188,10 +195,12 @@ const updateBookingStatus = async (req, res) => {
 
     // Notify user via Socket.io
     const io = req.app.get('io');
-    io.to(booking.user.toString()).emit('booking-status-updated', updatedBooking);
+    if (io && booking.user) {
+      io.to(booking.user.toString()).emit('booking-status-updated', updatedBooking);
+    }
 
     // Notify captain if status changed
-    if (booking.captain && booking.captain.toString() !== req.user._id.toString()) {
+    if (io && booking.captain && booking.captain.toString() !== req.user._id.toString()) {
       io.to(booking.captain.toString()).emit('booking-status-updated', updatedBooking);
     }
 
@@ -240,21 +249,25 @@ const processMockPayment = async (req, res) => {
     }
 
     // Create payment notification
-    await Notification.create({
-      user: booking.user._id,
-      title: 'Payment Successful',
-      message: `Payment of ₹${booking.price} has been processed successfully. Transaction ID: ${transactionId}`,
-      type: 'payment',
-      booking: booking._id
-    });
+    if (booking.user) {
+      await Notification.create({
+        user: booking.user,
+        title: 'Payment Successful',
+        message: `Payment of ₹${booking.price} has been processed successfully. Transaction ID: ${transactionId}`,
+        type: 'payment',
+        booking: booking._id
+      });
+    }
 
     // Notify user via socket
     const io = req.app.get('io');
-    io.to(booking.user.toString()).emit('payment-successful', {
-      booking: updatedBooking,
-      transactionId,
-      amount: booking.price
-    });
+    if (io && booking.user) {
+      io.to(booking.user.toString()).emit('payment-successful', {
+        booking: updatedBooking,
+        transactionId,
+        amount: booking.price
+      });
+    }
 
     res.json({
       message: 'Payment successful',
@@ -264,6 +277,7 @@ const processMockPayment = async (req, res) => {
       timestamp: new Date()
     });
   } catch (error) {
+    console.error('Payment Error:', error);
     res.status(500).json({ message: error.message });
   }
 };
@@ -280,7 +294,7 @@ const submitRating = async (req, res) => {
       return res.status(404).json({ message: 'Booking not found' });
     }
 
-    if (booking.user.toString() !== req.user._id.toString()) {
+    if (!booking.user || booking.user.toString() !== req.user._id.toString()) {
       return res.status(403).json({ message: 'Not authorized' });
     }
 
@@ -338,7 +352,7 @@ const getBookingTracking = async (req, res) => {
       return res.status(404).json({ message: 'Booking not found' });
     }
 
-    if (booking.user.toString() !== req.user._id.toString() && booking.captain?._id.toString() !== req.user._id.toString()) {
+    if (booking.user && booking.user.toString() !== req.user._id.toString() && (!booking.captain || booking.captain._id.toString() !== req.user._id.toString())) {
       return res.status(403).json({ message: 'Not authorized' });
     }
 
@@ -398,10 +412,12 @@ const updateCaptainLocation = async (req, res) => {
 
     // Notify user of location update
     const io = req.app.get('io');
-    io.to(booking.user.toString()).emit('captain-location-updated', {
-      bookingId: booking._id,
-      location: { lat, lng }
-    });
+    if (io && booking.user) {
+      io.to(booking.user.toString()).emit('captain-location-updated', {
+        bookingId: booking._id,
+        location: { lat, lng }
+      });
+    }
 
     res.json({ message: 'Location updated successfully' });
   } catch (error) {
