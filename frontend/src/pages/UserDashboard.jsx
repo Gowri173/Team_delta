@@ -68,7 +68,7 @@ const UserDashboard = () => {
     fetchServices();
     fetchBookings();
 
-    const socket = io('http://localhost:5001');
+    const socket = io('https://team-delta-uzst.onrender.com');
     socket.emit('join', user._id);
 
     socket.on('booking-status-updated', (updatedBooking) => {
