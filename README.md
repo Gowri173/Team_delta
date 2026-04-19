@@ -2,26 +2,30 @@
 
 **ServeEase** is a modern, full-stack, on-demand service marketplace platform. It connects end-users who need household services (like Plumbing, Cleaning, or Repairs) with registered "Captains" (Service Providers) in real-time, functioning similarly to apps like Uber or Rapido.
 
-The platform is designed with a premium **Glassmorphism** UI, robust role-based access control, and real-time Socket.io integrations to provide an exceptional, startup-level user experience.
+The platform is designed with a premium **Glassmorphism** UI, robust role-based access control, AI enhancements, and real-time Socket.io integrations to provide an exceptional, startup-level user experience.
 
 ---
 
-## 🌟 Key Features
+## 🌟 Key Features & Recent Updates
+
+### 🤖 AI Assistant (New!)
+- **Gemini-Powered Chatbot:** A fully integrated AI assistant (MedRAGnosis / ServeEase AI) on the User Dashboard that helps users find the right services based on natural language queries (e.g., "My sink is leaking").
+- **Smart Analytics:** Real-time visual growth rates and metrics powered by `recharts`.
 
 ### 👤 User Features
-- **Browse Services:** Users can view available services with base pricing.
+- **Profile Management:** Edit profile details and add phone numbers for direct communication.
 - **Interactive Map Booking:** Integrated Leaflet maps allow users to drop a pin on their exact location to request a service.
 - **Live Status Tracking:** Real-time Socket.io updates for booking statuses (`Requested` → `Accepted` → `In Progress` → `Completed`).
-- **Checkout Flow:** Simulated mock payment system upon service completion.
+- **Rating System:** Users can leave a 5-star rating for their Captain, instantly reflecting on the Captain's tracking profile.
 
 ### 👨‍🔧 Captain (Service Provider) Features
-- **Availability Toggle:** Go "online" or "offline" to receive live broadcasts of service requests.
-- **Live Broadcasting:** Instantly receive new job requests that match the Captain's registered service type via WebSockets.
-- **Booking Management:** Accept requests, start work, and mark jobs as completed.
+- **Strict Approval Gateway:** Captains must be explicitly approved by an Admin before accessing jobs.
+- **Live Broadcasting:** Instantly receive new job requests via WebSockets with dynamic map routing.
+- **Dashboard Ratings:** Captains can view their real-time aggregate ratings and manage their profiles.
 
 ### 🛡️ Admin Dashboard
-- **Analytics Overview:** View top-level platform statistics (Total Users, Captains, Bookings, and Revenue).
-- **Captain Roster:** Review registered Captains and toggle their "Approved" status to control who can accept jobs on the platform.
+- **Graphical Analytics:** Real-time Recharts visualization of Company Growth and Booking Volumes.
+- **Full Roster Control:** View and manage all Users and Captains in the ecosystem. Approve or revoke Captain statuses on the fly.
 
 ---
 
@@ -31,117 +35,63 @@ The platform is designed with a premium **Glassmorphism** UI, robust role-based 
 - **Framework:** React.js + Vite
 - **Styling:** Tailwind CSS v4 (Glassmorphism design, Dark Mode)
 - **State Management:** Redux Toolkit
-- **Animations:** Framer Motion
+- **Animations / Charts:** Framer Motion, Recharts
 - **Maps:** React-Leaflet (OpenStreetMap)
-- **API Calls:** Axios
 
 ### Backend
 - **Environment:** Node.js + Express.js
-- **Database:** MongoDB + Mongoose (Atlas URI supported)
-- **Architecture:** Clean Architecture (Routes → Controllers → Models → Middleware)
-- **Authentication:** JWT stored in HTTP-Only Cookies, bcrypt for password hashing
+- **Database:** MongoDB + Mongoose
+- **Authentication:** JWT, bcrypt
 - **Real-Time:** Socket.io
+- **AI Integration:** Google GenAI API (`@google/genai`)
 
 ---
 
-## 📂 Project Structure
+## 🚀 One-Click Setup & Run
 
-```text
-ServeEase/
-├── backend/
-│   ├── src/
-│   │   ├── config/        # DB & Env configurations
-│   │   ├── controllers/   # Request handlers (Auth, Admin, Bookings, Services)
-│   │   ├── middlewares/   # JWT protection and Role validation
-│   │   ├── models/        # Mongoose Schemas
-│   │   ├── routes/        # Express route definitions
-│   │   ├── utils/         # Helpers (e.g., JWT generator)
-│   │   ├── app.js         # Express app setup
-│   │   └── server.js      # Server entry point & Socket.io init
-│   ├── seed.js            # Script to seed default services
-│   ├── seedAdmin.js       # Script to seed the default Admin user
-│   └── package.json
-│
-└── frontend/
-    ├── src/
-    │   ├── components/    # Reusable UI components (Navbar, GlassCard)
-    │   ├── pages/         # Core views (Home, Login, Register, Dashboards)
-    │   ├── services/      # Axios API instances
-    │   ├── store/         # Redux store and slices
-    │   ├── App.jsx        # React Router configuration
-    │   └── main.jsx       # React entry point
-    ├── index.css          # Tailwind imports and Glassmorphism utilities
-    └── package.json
+We've made running the project as simple as double-clicking a script! All dependency requirements are handled automatically.
+
+### Requirements
+- **Node.js** installed on your system.
+- **MongoDB Atlas URI** (or local MongoDB).
+- **Gemini API Key** (for AI Assistant).
+
+### For Windows Users 🪟
+Simply double-click the `run.bat` file in the root directory!
+Alternatively, from the command prompt:
+```cmd
+run.bat
+```
+*This will automatically install frontend & backend dependencies in the background and launch two new command windows starting your servers.*
+
+### For Mac / Linux Users 🍎
+Make the bash script executable and run it:
+```bash
+chmod +x run.sh
+./run.sh
 ```
 
----
-
-## 🚀 Getting Started
-
-### Prerequisites
-- Node.js installed on your machine
-- MongoDB Atlas URI (or local MongoDB instance)
-
-### 1. Backend Setup
-
-1. Navigate to the backend directory:
-   ```bash
-   cd backend
-   ```
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Create a `.env` file in the `backend/` directory:
-   ```env
-   NODE_ENV=development
-   PORT=5000
-   MONGO_URI=your_mongodb_uri_here
-   JWT_SECRET=your_super_secret_jwt_key
-   JWT_EXPIRE=30d
-   ```
-4. **Seed the database:**
-   To populate the database with default services (Plumbing, Cleaning, etc.):
-   ```bash
-   node seed.js
-   ```
-   To create the default Admin account (`admin@serveease.com` / `password123`):
-   ```bash
-   node seedAdmin.js
-   ```
-5. Start the backend development server:
-   ```bash
-   npm run dev
-   ```
-
-### 2. Frontend Setup
-
-1. Open a new terminal and navigate to the frontend directory:
-   ```bash
-   cd frontend
-   ```
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Start the Vite development server:
-   ```bash
-   npm run dev
-   ```
-4. The application will be available at `http://localhost:5173`.
+### Manual Configuration (.env)
+Ensure your `backend/.env` file is properly configured. A sample configuration:
+```env
+NODE_ENV=development
+PORT=8000
+MONGO_URI=your_mongodb_uri_here
+JWT_SECRET=supersecretjwtkey123
+JWT_EXPIRE=30d
+GEMINI_API_KEY=your_gemini_api_key_here
+```
 
 ---
 
 ## 💡 How to Test Locally
 
-1. **Start both servers** (Backend on port 5000, Frontend on port 5173).
-2. **Open two different browsers** (or one normal and one Incognito window).
-3. **Register a Captain** in window 1, selecting "Plumbing" as the service. Set availability to ON.
-4. **Register a User** in window 2. 
-5. In the User Dashboard, click on the map, select "Plumbing", and click "Request Now".
-6. Watch the request instantly pop up on the Captain's dashboard in window 1! 
-7. The Captain can click "Accept", "Start Work", and "Complete", and the User's dashboard will reflect these status changes in real-time.
-8. Log in as an **Admin** (`admin@serveease.com`) to view the overall platform stats and manage the Captain you just registered.
+1. **Start the project** using `run.bat` or `./run.sh` (Backend runs on `http://localhost:8000`, Frontend on `http://localhost:5173`).
+2. **Open two browser windows** (or one normal and one Incognito).
+3. **Register a Captain** in window 1.
+4. **Log in as Admin** in window 2 to approve the Captain from the Dashboard.
+5. **Register a User** and request a service on the interactive map.
+6. Watch the request instantly pop up on the Captain's dashboard, track them in real-time, and leave a review once completed!
 
 ---
 
