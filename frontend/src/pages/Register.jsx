@@ -76,6 +76,7 @@ const Register = () => {
       if (role === 'captain') {
         submitData.serviceType = formData.serviceType === 'OTHER' ? formData.customService : formData.serviceType;
         submitData.isCustomService = formData.serviceType === 'OTHER';
+        submitData.customService = formData.customService;
       }
 
       const { data } = await api.post(endpoint, submitData);
